@@ -24,7 +24,7 @@
           {% for g in groups %}
           <option value="{{ g.id }}"
             {% if ticket and ticket.group_id == g.id %}selected
-            {% elif not ticket and current_user.groups and g.id == current_user.groups[0].id %}selected
+            {% elif not ticket and user_default_group_id and g.id == user_default_group_id %}selected
             {% endif %}>
             {{ g.name }}
           </option>

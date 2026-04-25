@@ -26,7 +26,7 @@ from app.dependencies import get_current_user, require_usuario_or_above
 from app.models.group import Group
 from app.models.status import Status
 from app.models.ticket import Ticket, TicketStatusHistory, Priority
-from app.models.user import User, UserRole
+from app.models.user import User, UserRole, user_group
 
 router = APIRouter(prefix="/tickets", tags=["tickets"])
 
@@ -101,11 +101,20 @@ async def new_ticket_form(
     result = await db.execute(select(Status).order_by(Status.id))
     statuses = result.scalars().all()
 
+    # Load user's first group id to pre-select in form (avoids lazy-load in template)
+    ug_result = await db.execute(
+        select(user_group.c.group_id)
+        .where(user_group.c.user_id == current_user.id)
+        .limit(1)
+    )
+    user_default_group_id = ug_result.scalar_one_or_none()
+
     return _templates().TemplateResponse(
         "tickets/form.html",
         {
             "request": request,
             "current_user": current_user,
+            "user_default_group_id": user_default_group_id,
             "groups": groups,
             "users": users,
             "statuses": statuses,

@@ -81,7 +81,12 @@
               </tr>
               <tr>
                 <th>Costo estimado</th>
-                <td>{% if ticket.estimated_cost %}{{ ticket.estimated_cost }} min{% else %}—{% endif %}</td>
+                <td>
+                  {% if ticket.estimated_cost is not none %}
+                    {{ (ticket.estimated_cost / 60) | round(2) }} h
+                    <span class="text-muted">({{ ticket.estimated_cost }} min)</span>
+                  {% else %}—{% endif %}
+                </td>
               </tr>
               <tr>
                 <th>Creado por</th>

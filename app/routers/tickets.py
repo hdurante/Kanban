@@ -55,6 +55,34 @@ def _compute_effective_color(ticket: Ticket) -> str:
     return ticket.priority.value
 
 
+def _parse_estimated_cost_hours(value: str) -> int | None:
+    """Convert decimal hours (e.g. 0.5) to minutes for DB storage."""
+    if not value:
+        return None
+    normalized = value.strip().replace(",", ".")
+    if not normalized:
+        return None
+    try:
+        hours = float(normalized)
+    except ValueError:
+        return None
+    if hours < 0:
+        return None
+    return int(round(hours * 60))
+
+
+def _validate_ticket_text_fields(title: str, description: str) -> tuple[str, str]:
+    title_clean = title.strip()
+    if not title_clean:
+        raise HTTPException(status_code=400, detail="El titulo es obligatorio")
+    if len(title_clean) > 150:
+        raise HTTPException(status_code=400, detail="El titulo no puede exceder 150 caracteres")
+    description_clean = description or ""
+    if len(description_clean) > 1000:
+        raise HTTPException(status_code=400, detail="La descripcion no puede exceder 1000 caracteres")
+    return title_clean, description_clean
+
+
 async def _can_edit_ticket(current_user: User, ticket: Ticket) -> bool:
     """Check if the current user is allowed to edit a ticket."""
     if current_user.role in (UserRole.admin, UserRole.lider):
@@ -147,6 +175,8 @@ async def create_ticket(
         except ValueError:
             pass
 
+    title, description = _validate_ticket_text_fields(title, description)
+
     ticket = Ticket(
         title=title,
         description=description or None,
@@ -155,7 +185,7 @@ async def create_ticket(
         status_id=1,
         group_id=group_id,
         estimated_date=est_date,
-        estimated_cost=int(estimated_cost) if estimated_cost else None,
+        estimated_cost=_parse_estimated_cost_hours(estimated_cost),
         assigned_to_id=int(assigned_to_id) if assigned_to_id else None,
         requested_by_id=int(requested_by_id) if requested_by_id else None,
         created_by_id=current_user.id,
@@ -231,12 +261,14 @@ async def edit_ticket(
     if not await _can_edit_ticket(current_user, ticket):
         raise HTTPException(status_code=403, detail="No tienes permiso para editar este ticket")
 
+    title, description = _validate_ticket_text_fields(title, description)
+
     ticket.title = title
     ticket.description = description or None
     ticket.reference = reference or None
     ticket.priority = Priority(priority)
     ticket.group_id = group_id
-    ticket.estimated_cost = int(estimated_cost) if estimated_cost else None
+    ticket.estimated_cost = _parse_estimated_cost_hours(estimated_cost)
     ticket.assigned_to_id = int(assigned_to_id) if assigned_to_id else None
     ticket.requested_by_id = int(requested_by_id) if requested_by_id else None
 

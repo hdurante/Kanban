@@ -33,7 +33,7 @@ class Ticket(Base):
     __tablename__ = "tickets"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(300), nullable=False)
+    title = Column(String(150), nullable=False)
     description = Column(Text, nullable=True)
     reference = Column(String(100), nullable=True)  # Jira / external ticket ref
 

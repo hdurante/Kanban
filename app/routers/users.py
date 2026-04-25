@@ -23,7 +23,7 @@ from app.database import get_db
 from app.dependencies import get_current_user, require_admin
 from app.models.group import Group
 from app.models.ticket import Ticket
-from app.models.user import User, UserRole
+from app.models.user import User, UserRole, user_group
 from app.services.auth import hash_password
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -123,7 +123,11 @@ async def create_user(
 
     if group_ids:
         g_result = await db.execute(select(Group).where(Group.id.in_(group_ids)))
-        new_user.groups = g_result.scalars().all()
+        groups_to_add = g_result.scalars().all()
+        await db.execute(
+            user_group.insert(),
+            [{'user_id': new_user.id, 'group_id': g.id} for g in groups_to_add]
+        )
 
     await db.commit()
     return RedirectResponse("/users", status_code=302)
@@ -208,9 +212,15 @@ async def update_user(
 
     if group_ids:
         g_result = await db.execute(select(Group).where(Group.id.in_(group_ids)))
-        user.groups = g_result.scalars().all()
+        new_groups = g_result.scalars().all()
+        await db.execute(user_group.delete().where(user_group.c.user_id == user.id))
+        if new_groups:
+            await db.execute(
+                user_group.insert(),
+                [{'user_id': user.id, 'group_id': g.id} for g in new_groups]
+            )
     else:
-        user.groups = []
+        await db.execute(user_group.delete().where(user_group.c.user_id == user.id))
 
     await db.commit()
     return RedirectResponse("/users", status_code=302)

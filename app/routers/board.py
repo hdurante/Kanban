@@ -61,13 +61,28 @@ def _is_overdue(ticket: Ticket) -> bool:
 @router.get("/board", response_class=HTMLResponse)
 async def board(
     request: Request,
-    group_id: int | None = None,
+    group_id: str | None = None,
     priority: str | None = None,
-    assigned_to: int | None = None,
+    assigned_to: str | None = None,
     search: str | None = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    # Convert empty strings to None and parse integers
+    try:
+        group_id = int(group_id) if group_id and group_id.strip() else None
+    except (ValueError, AttributeError):
+        group_id = None
+    
+    try:
+        assigned_to = int(assigned_to) if assigned_to and assigned_to.strip() else None
+    except (ValueError, AttributeError):
+        assigned_to = None
+    
+    # Clean up empty strings in string params
+    priority = priority.strip() if priority and priority.strip() else None
+    search = search.strip() if search and search.strip() else None
+
     # Load user with groups
     result = await db.execute(
         select(User).options(selectinload(User.groups)).where(User.id == current_user.id)

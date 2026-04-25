@@ -1,0 +1,106 @@
+{% set form_action = "/tickets/" ~ ticket.id ~ "/edit" if ticket else "/tickets/new" %}
+{% set form_title = "Editar Ticket #" ~ ticket.id if ticket else "Nuevo Ticket" %}
+
+<div class="container" style="max-width:700px">
+  <h5 class="mb-3 fw-bold"><i class="bi bi-ticket-perforated me-2"></i>{{ form_title }}</h5>
+
+  {% if error %}
+  <div class="alert alert-danger py-2">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" action="{{ form_action }}" class="card shadow-sm p-4">
+    <div class="row g-3">
+
+      <div class="col-12">
+        <label class="form-label fw-semibold">Título <span class="text-danger">*</span></label>
+        <input type="text" name="title" class="form-control"
+               value="{{ ticket.title if ticket else '' }}" required maxlength="300" />
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Grupo <span class="text-danger">*</span></label>
+        <select name="group_id" class="form-select" required>
+          <option value="">— Seleccionar —</option>
+          {% for g in groups %}
+          <option value="{{ g.id }}"
+            {% if ticket and ticket.group_id == g.id %}selected
+            {% elif not ticket and current_user.groups and g.id == current_user.groups[0].id %}selected
+            {% endif %}>
+            {{ g.name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Prioridad</label>
+        <select name="priority" class="form-select">
+          {% for val, label in priorities.items() %}
+          <option value="{{ val }}"
+            {% if ticket and ticket.priority.value == val %}selected
+            {% elif not ticket and val == 'normal' %}selected{% endif %}>
+            {{ label }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Asignado a</label>
+        <select name="assigned_to_id" class="form-select">
+          <option value="">— Sin asignar —</option>
+          {% for u in users %}
+          <option value="{{ u.id }}" {% if ticket and ticket.assigned_to_id == u.id %}selected{% endif %}>
+            {{ u.name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Solicitado por</label>
+        <select name="requested_by_id" class="form-select">
+          <option value="">—</option>
+          {% for u in users %}
+          <option value="{{ u.id }}" {% if ticket and ticket.requested_by_id == u.id %}selected{% endif %}>
+            {{ u.name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Fecha estimada de término</label>
+        <input type="datetime-local" name="estimated_date" class="form-control"
+          value="{{ ticket.estimated_date.strftime('%Y-%m-%dT%H:%M') if ticket and ticket.estimated_date else '' }}" />
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Costo estimado (minutos)</label>
+        <input type="number" name="estimated_cost" class="form-control" min="0"
+               value="{{ ticket.estimated_cost if ticket and ticket.estimated_cost else '' }}" />
+      </div>
+
+      <div class="col-12">
+        <label class="form-label fw-semibold">Referencia externa (ej. Jira)</label>
+        <input type="text" name="reference" class="form-control" maxlength="100"
+               value="{{ ticket.reference if ticket and ticket.reference else '' }}"
+               placeholder="PROJ-123" />
+      </div>
+
+      <div class="col-12">
+        <label class="form-label fw-semibold">Descripción</label>
+        <textarea name="description" class="form-control" rows="4">{{ ticket.description if ticket and ticket.description else '' }}</textarea>
+      </div>
+
+      <div class="col-12 d-flex gap-2 justify-content-end">
+        <a href="{% if ticket %}/tickets/{{ ticket.id }}{% else %}/board{% endif %}"
+           class="btn btn-outline-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check2 me-1"></i>
+          {% if ticket %}Guardar cambios{% else %}Crear ticket{% endif %}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

@@ -73,8 +73,9 @@ $RECYCLE.BIN/
 *~
 
 # ── Editors / IDEs ────────────────────────────────────────────────────────────
-.vscode/
+.vscode/*
 !.vscode/extensions.json
+# launch.json is personal (local paths, debug args) — not committed
 .idea/
 *.swp
 *.swo

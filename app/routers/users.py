@@ -54,7 +54,7 @@ async def list_users(
             "groups": groups,
             "current_user": current_user,
             "roles": UserRole,
-            "app_name": settings.app_name,
+            "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix,
         },
     )
 
@@ -75,7 +75,7 @@ async def new_user_form(
             "groups": groups,
             "roles": UserRole,
             "current_user": current_user,
-            "app_name": settings.app_name,
+            "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix,
         },
     )
 
@@ -106,7 +106,7 @@ async def create_user(
                 "roles": UserRole,
                 "current_user": current_user,
                 "error": "El email ya está registrado",
-                "app_name": settings.app_name,
+                "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix,
             },
             status_code=400,
         )
@@ -157,7 +157,7 @@ async def edit_user_form(
             "groups": groups,
             "roles": UserRole,
             "current_user": current_user,
-            "app_name": settings.app_name,
+            "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix,
         },
     )
 
@@ -198,7 +198,7 @@ async def update_user(
                 "roles": UserRole,
                 "current_user": current_user,
                 "error": "El email ya está en uso",
-                "app_name": settings.app_name,
+                "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix,
             },
             status_code=400,
         )

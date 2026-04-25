@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  <title>{% block title %}{{ app_name }}{% if app_title_suffix %} + {{ app_title_suffix }}{% endif %}{% endblock %}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
   <link rel="stylesheet" href="/static/css/main.css" />
@@ -14,7 +14,7 @@
 {% if current_user is defined and current_user %}
 <nav class="navbar navbar-dark bg-dark px-3 py-2 d-flex align-items-center gap-3">
   <a class="navbar-brand fw-bold" href="/board">
-    <i class="bi bi-kanban-fill me-1"></i>{{ app_name }}
+    <i class="bi bi-kanban-fill me-1"></i>{{ app_name }}{% if app_title_suffix %} <small class="text-muted">+ {{ app_title_suffix }}</small>{% endif %}
   </a>
   <div class="d-flex gap-2 ms-auto align-items-center">
     {% if current_user.role.value in ['admin','lider','colaborador','usuario'] %}

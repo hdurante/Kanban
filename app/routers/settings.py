@@ -59,7 +59,7 @@ async def settings_page(
             "configs": configs,
             "defaults": DEFAULT_CONFIG,
             "current_user": current_user,
-            "app_name": settings.app_name,
+            "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix,
         },
     )
 

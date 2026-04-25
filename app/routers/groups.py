@@ -40,7 +40,7 @@ async def list_groups(
     groups = result.scalars().all()
     return _templates().TemplateResponse(
         "groups/list.html",
-        {"request": request, "groups": groups, "current_user": current_user, "app_name": settings.app_name},
+        {"request": request, "groups": groups, "current_user": current_user, "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix},
     )
 
 
@@ -63,7 +63,7 @@ async def create_group(
                 "groups": groups,
                 "current_user": current_user,
                 "error": "Ya existe un grupo con ese nombre",
-                "app_name": settings.app_name,
+                "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix,
             },
             status_code=400,
         )

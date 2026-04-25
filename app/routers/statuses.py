@@ -46,7 +46,7 @@ async def list_statuses(
             "request": request,
             "statuses": statuses,
             "current_user": current_user,
-            "app_name": settings.app_name,
+            "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix,
         },
     )
 
@@ -69,7 +69,7 @@ async def create_status(
                 "statuses": statuses,
                 "current_user": current_user,
                 "error": "El orden debe estar entre 2 y 998",
-                "app_name": settings.app_name,
+                "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix,
             },
             status_code=400,
         )
@@ -85,7 +85,7 @@ async def create_status(
                 "statuses": statuses,
                 "current_user": current_user,
                 "error": f"Ya existe un estado con el orden {order}",
-                "app_name": settings.app_name,
+                "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix,
             },
             status_code=400,
         )

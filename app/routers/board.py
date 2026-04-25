@@ -172,6 +172,6 @@ async def board(
             "filter_priority": priority,
             "filter_assigned_to": assigned_to,
             "filter_search": search,
-            "app_name": settings.app_name,
+            "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix,
         },
     )

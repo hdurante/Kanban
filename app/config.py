@@ -41,6 +41,7 @@ class Settings(BaseSettings):
 
     # App
     app_name: str = "Kanban"
+    app_title_suffix: str = ""  # e.g., "Mi Empresa" -> "Kanban + Mi Empresa"
     debug: bool = False
 
     model_config = {"env_file": ".env"}

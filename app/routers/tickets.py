@@ -148,7 +148,7 @@ async def new_ticket_form(
             "statuses": statuses,
             "priorities": PRIORITY_LABELS,
             "ticket": None,
-            "app_name": settings.app_name,
+            "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix,
         },
     )
 
@@ -236,7 +236,7 @@ async def ticket_detail(
             "users": users,
             "statuses": statuses,
             "priorities": PRIORITY_LABELS,
-            "app_name": settings.app_name,
+            "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix,
         },
     )
 

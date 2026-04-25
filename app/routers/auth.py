@@ -41,7 +41,7 @@ def _templates():
 async def login_page(request: Request):
     if request.cookies.get("access_token"):
         return RedirectResponse("/board", status_code=302)
-    return _templates().TemplateResponse("login.html", {"request": request, "app_name": settings.app_name})
+    return _templates().TemplateResponse("login.html", {"request": request, "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix})
 
 
 @router.post("/login", response_class=HTMLResponse)
@@ -55,7 +55,7 @@ async def login(
     if not user:
         return _templates().TemplateResponse(
             "login.html",
-            {"request": request, "app_name": settings.app_name, "error": "Credenciales incorrectas"},
+            {"request": request, "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix, "error": "Credenciales incorrectas"},
             status_code=400,
         )
     token = create_access_token({"sub": str(user.id), "role": user.role})
@@ -90,7 +90,7 @@ async def request_otp(
         "login.html",
         {
             "request": request,
-            "app_name": settings.app_name,
+            "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix,
             "otp_sent": True,
             "otp_email": email,
             "otp_message": msg,
@@ -111,7 +111,7 @@ async def verify_otp(
             "login.html",
             {
                 "request": request,
-                "app_name": settings.app_name,
+                "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix,
                 "otp_sent": True,
                 "otp_email": email,
                 "error": "Código inválido, expirado o sin usos disponibles.",

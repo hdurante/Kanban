@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Estados — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:700px">
+  <div class="d-flex align-items-center mb-3">
+    <h5 class="mb-0 fw-bold"><i class="bi bi-list-ol me-2"></i>Estados del tablero</h5>
+  </div>
+  <p class="text-muted small">
+    Los estados <strong>1 (Por Hacer)</strong> y <strong>999 (Terminado)</strong> son fijos y no pueden eliminarse.
+    El número define el orden en el tablero (2–998 para estados personalizados).
+  </p>
+
+  {% if error %}
+  <div class="alert alert-danger py-2">{{ error }}</div>
+  {% endif %}
+
+  <div class="row g-3">
+    <!-- Create form -->
+    <div class="col-md-5">
+      <div class="card shadow-sm p-3">
+        <h6 class="fw-semibold mb-3">Nuevo estado</h6>
+        <form method="post" action="/statuses/new">
+          <div class="mb-2">
+            <label class="form-label small fw-semibold">Orden (2–998)</label>
+            <input type="number" name="order" class="form-control form-control-sm"
+                   min="2" max="998" required placeholder="ej. 4" />
+          </div>
+          <div class="mb-2">
+            <label class="form-label small fw-semibold">Nombre</label>
+            <input type="text" name="name" class="form-control form-control-sm"
+                   required maxlength="100" placeholder="ej. En Revisión" />
+          </div>
+          <button type="submit" class="btn btn-sm btn-primary w-100">
+            <i class="bi bi-plus-lg me-1"></i> Crear
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- List -->
+    <div class="col-md-7">
+      <div class="card shadow-sm">
+        <ul class="list-group list-group-flush">
+          {% for s in statuses %}
+          <li class="list-group-item d-flex align-items-center gap-2">
+            <span class="badge bg-dark me-1">{{ s.id }}</span>
+            <span class="flex-grow-1 fw-semibold">{{ s.name }}</span>
+            {% if s.is_locked %}
+            <span class="badge bg-secondary"><i class="bi bi-lock"></i> Fijo</span>
+            {% else %}
+            <!-- Inline edit -->
+            <button class="btn btn-xs btn-outline-primary" onclick="toggleEdit({{ s.id }})">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <form method="post" action="/statuses/{{ s.id }}/delete" class="d-inline"
+                  onsubmit="return confirm('Los tickets en este estado pasarán a Por Hacer. ¿Continuar?')">
+              <button type="submit" class="btn btn-xs btn-outline-danger">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+            {% endif %}
+          </li>
+          {% if not s.is_locked %}
+          <li class="list-group-item p-0" id="edit-{{ s.id }}" style="display:none">
+            <form method="post" action="/statuses/{{ s.id }}/edit" class="d-flex gap-2 p-2">
+              <input type="text" name="name" class="form-control form-control-sm"
+                     value="{{ s.name }}" required />
+              <button type="submit" class="btn btn-sm btn-success">
+                <i class="bi bi-check2"></i>
+              </button>
+            </form>
+          </li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function toggleEdit(id) {
+  const el = document.getElementById('edit-' + id);
+  el.style.display = el.style.display === 'none' ? '' : 'none';
+}
+</script>
+{% endblock %}

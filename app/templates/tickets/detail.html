@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}#{{ ticket.id }} {{ ticket.title }} — {{ app_name }}{% endblock %}
+
+{% block content %}
+{% set color = ticket._effective_color if ticket._effective_color is defined else ticket.priority.value %}
+{% set color_map = {
+  'prioritario': '#dc3545',
+  'alto':        '#ffc107',
+  'normal':      '#28a745',
+  'bajo':        '#6c757d',
+  'retrasado':   '#6f42c1'
+} %}
+{% set border_color = color_map.get(color, '#6c757d') %}
+
+<div class="container" style="max-width:860px">
+  <div class="d-flex align-items-center gap-2 mb-3">
+    <a href="/board" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Tablero
+    </a>
+    <h5 class="mb-0">
+      <span class="text-muted">#{{ ticket.id }}</span>
+      <span class="ms-2">{{ ticket.title }}</span>
+    </h5>
+    <span class="badge ms-auto" style="background:{{ border_color }}">
+      {{ color | capitalize }}
+    </span>
+    {% if can_edit %}
+    <a href="#" class="btn btn-sm btn-primary" onclick="showEditForm()">
+      <i class="bi bi-pencil"></i> Editar
+    </a>
+    <form method="post" action="/tickets/{{ ticket.id }}/delete"
+          onsubmit="return confirm('¿Eliminar este ticket?')">
+      <button type="submit" class="btn btn-sm btn-outline-danger">
+        <i class="bi bi-trash"></i>
+      </button>
+    </form>
+    {% endif %}
+  </div>
+
+  <div class="row g-3">
+    <!-- Detail card -->
+    <div class="col-lg-8">
+      <div class="card shadow-sm" id="detailCard" style="border-left: 4px solid {{ border_color }}">
+        <div class="card-body">
+          <table class="table table-sm table-borderless mb-0">
+            <tbody>
+              <tr>
+                <th width="160">Grupo</th>
+                <td><span class="badge bg-secondary">{{ ticket.group.name }}</span></td>
+              </tr>
+              <tr>
+                <th>Estado</th>
+                <td>{{ ticket.status.name }}</td>
+              </tr>
+              <tr>
+                <th>Prioridad</th>
+                <td>{{ color | capitalize }}</td>
+              </tr>
+              <tr>
+                <th>Asignado a</th>
+                <td>{{ ticket.assignee.name if ticket.assignee else '— Sin asignar —' }}</td>
+              </tr>
+              <tr>
+                <th>Solicitado por</th>
+                <td>{{ ticket.requester.name if ticket.requester else '—' }}</td>
+              </tr>
+              <tr>
+                <th>Referencia</th>
+                <td>{{ ticket.reference or '—' }}</td>
+              </tr>
+              <tr>
+                <th>Fecha estimada</th>
+                <td>
+                  {% if ticket.estimated_date %}
+                    {{ ticket.estimated_date.strftime('%d/%m/%Y') }}
+                    {% if ticket._is_overdue is defined and ticket._is_overdue %}
+                      <span class="badge bg-purple ms-1">Vencido</span>
+                    {% endif %}
+                  {% else %}—{% endif %}
+                </td>
+              </tr>
+              <tr>
+                <th>Costo estimado</th>
+                <td>{% if ticket.estimated_cost %}{{ ticket.estimated_cost }} min{% else %}—{% endif %}</td>
+              </tr>
+              <tr>
+                <th>Creado por</th>
+                <td>{{ ticket.creator.name }}</td>
+              </tr>
+              <tr>
+                <th>Fecha creación</th>
+                <td>{{ ticket.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+              </tr>
+              {% if ticket.finished_at %}
+              <tr>
+                <th>Fecha fin</th>
+                <td>{{ ticket.finished_at.strftime('%d/%m/%Y %H:%M') }}</td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+          {% if ticket.description %}
+          <hr />
+          <h6 class="fw-semibold">Descripción</h6>
+          <p class="mb-0" style="white-space:pre-wrap">{{ ticket.description }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Side: change status + history -->
+    <div class="col-lg-4">
+      {% if can_edit %}
+      <div class="card shadow-sm mb-3">
+        <div class="card-header fw-semibold py-2">
+          <i class="bi bi-arrow-left-right me-1"></i> Cambiar estado
+        </div>
+        <div class="card-body py-2">
+          <form method="post" action="/tickets/{{ ticket.id }}/status">
+            <div class="input-group input-group-sm">
+              <select name="status_id" class="form-select">
+                {% for s in statuses %}
+                <option value="{{ s.id }}" {% if s.id == ticket.status_id %}selected{% endif %}>
+                  {{ s.name }}
+                </option>
+                {% endfor %}
+              </select>
+              <button type="submit" class="btn btn-primary">OK</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- History -->
+      <div class="card shadow-sm">
+        <div class="card-header fw-semibold py-2">
+          <i class="bi bi-clock-history me-1"></i> Historial
+        </div>
+        <ul class="list-group list-group-flush" style="max-height:300px;overflow-y:auto">
+          {% for h in ticket.status_history | reverse %}
+          <li class="list-group-item py-1 px-3 small">
+            <div>
+              <strong>{{ h.new_status.name if h.new_status else '?' }}</strong>
+              {% if h.old_status %}← {{ h.old_status.name }}{% endif %}
+            </div>
+            <div class="text-muted">
+              {{ h.changed_by.name if h.changed_by else 'Sistema' }}
+              · {{ h.changed_at.strftime('%d/%m/%Y %H:%M') }}
+            </div>
+          </li>
+          {% else %}
+          <li class="list-group-item py-2 px-3 small text-muted">Sin historial</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit form (hidden by default) -->
+{% if can_edit %}
+<div id="editFormSection" style="display:none" class="container mt-4" style="max-width:860px">
+  {% include "tickets/form.html" %}
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function showEditForm() {
+  document.getElementById('detailCard').closest('.row').style.display = 'none';
+  document.getElementById('editFormSection').style.display = 'block';
+}
+</script>
+{% endblock %}

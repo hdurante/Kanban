@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Configuración — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:700px">
+  <h5 class="fw-bold mb-1"><i class="bi bi-sliders me-2"></i>Configuración del sistema</h5>
+  <p class="text-muted small mb-4">Los cambios se aplican de inmediato y persisten en la base de datos.</p>
+
+  <form method="post" action="/settings" class="card shadow-sm p-4">
+    <div class="row g-3">
+
+      <div class="col-12">
+        <h6 class="fw-semibold text-secondary border-bottom pb-1">
+          <i class="bi bi-kanban me-1"></i> Tablero
+        </h6>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Nombre de la aplicación</label>
+        <input type="text" name="app_name" class="form-control"
+          value="{{ configs['app_name'].value if 'app_name' in configs else defaults['app_name'][0] }}" />
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Ocultar tickets terminados después de (días)</label>
+        <input type="number" name="completed_hide_days" class="form-control" min="1"
+          value="{{ configs['completed_hide_days'].value if 'completed_hide_days' in configs else defaults['completed_hide_days'][0] }}" />
+        <div class="form-text">Los tickets en estado "Terminado" más viejos que este valor se ocultarán del tablero.</div>
+      </div>
+
+      <div class="col-12 mt-2">
+        <h6 class="fw-semibold text-secondary border-bottom pb-1">
+          <i class="bi bi-key me-1"></i> Tokens OTP
+        </h6>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Longitud mínima</label>
+        <input type="number" name="otp_length" class="form-control" min="16"
+          value="{{ configs['otp_length'].value if 'otp_length' in configs else defaults['otp_length'][0] }}" />
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Usos máximos</label>
+        <input type="number" name="otp_max_uses" class="form-control" min="1"
+          value="{{ configs['otp_max_uses'].value if 'otp_max_uses' in configs else defaults['otp_max_uses'][0] }}" />
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Vigencia (días)</label>
+        <input type="number" name="otp_expire_days" class="form-control" min="1"
+          value="{{ configs['otp_expire_days'].value if 'otp_expire_days' in configs else defaults['otp_expire_days'][0] }}" />
+      </div>
+
+      <div class="col-12 mt-2">
+        <h6 class="fw-semibold text-secondary border-bottom pb-1">
+          <i class="bi bi-envelope me-1"></i> Correo (SMTP)
+        </h6>
+      </div>
+
+      <div class="col-md-8">
+        <label class="form-label fw-semibold">Servidor SMTP</label>
+        <input type="text" name="smtp_host" class="form-control"
+          value="{{ configs['smtp_host'].value if 'smtp_host' in configs else defaults['smtp_host'][0] }}" />
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Puerto</label>
+        <input type="number" name="smtp_port" class="form-control"
+          value="{{ configs['smtp_port'].value if 'smtp_port' in configs else defaults['smtp_port'][0] }}" />
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Usuario / Email remitente</label>
+        <input type="text" name="smtp_user" class="form-control"
+          value="{{ configs['smtp_user'].value if 'smtp_user' in configs else defaults['smtp_user'][0] }}" />
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Contraseña SMTP</label>
+        <input type="password" name="smtp_password" class="form-control"
+          value="{{ configs['smtp_password'].value if 'smtp_password' in configs else defaults['smtp_password'][0] }}"
+          autocomplete="new-password" />
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Usar STARTTLS</label>
+        <select name="smtp_tls" class="form-select">
+          <option value="true" {% if (configs['smtp_tls'].value if 'smtp_tls' in configs else 'true') == 'true' %}selected{% endif %}>Sí</option>
+          <option value="false" {% if (configs['smtp_tls'].value if 'smtp_tls' in configs else 'true') == 'false' %}selected{% endif %}>No</option>
+        </select>
+      </div>
+
+      <div class="col-12 d-flex justify-content-end mt-2">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-save me-1"></i> Guardar configuración
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

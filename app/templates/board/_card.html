@@ -1,0 +1,71 @@
+{% set color = ticket._effective_color if ticket._effective_color is defined else ticket.priority.value %}
+{% set color_map = {
+  'prioritario': '#dc3545',
+  'alto':        '#ffc107',
+  'normal':      '#28a745',
+  'bajo':        '#6c757d',
+  'retrasado':   '#6f42c1'
+} %}
+{% set border_color = color_map.get(color, '#6c757d') %}
+
+<div class="ticket-card"
+     id="ticket-{{ ticket.id }}"
+     data-ticket-id="{{ ticket.id }}"
+     data-status-id="{{ ticket.status_id }}"
+     style="border-left: 4px solid {{ border_color }};">
+
+  <!-- Header row -->
+  <div class="d-flex justify-content-between align-items-center mb-1">
+    <small class="text-muted fw-semibold">#{{ ticket.id }}</small>
+    <span class="badge rounded-pill" style="background:{{ border_color }}; font-size:.65rem;">
+      {% if color == 'prioritario' %}🔴
+      {% elif color == 'alto' %}🟡
+      {% elif color == 'normal' %}🟢
+      {% elif color == 'bajo' %}⚫
+      {% elif color == 'retrasado' %}🟣
+      {% endif %}
+      {{ color | capitalize }}
+    </span>
+  </div>
+
+  <!-- Group -->
+  <div class="ticket-group-tag">
+    <i class="bi bi-collection me-1"></i>{{ ticket.group.name }}
+  </div>
+
+  <!-- Title -->
+  <div class="ticket-title">{{ ticket.title }}</div>
+
+  <!-- Reference -->
+  {% if ticket.reference %}
+  <div class="ticket-ref">
+    <i class="bi bi-link-45deg me-1"></i>
+    <small class="text-muted font-monospace">{{ ticket.reference }}</small>
+  </div>
+  {% endif %}
+
+  <!-- Assignee dropdown (inline update via HTMX) -->
+  <form hx-post="/tickets/{{ ticket.id }}/assign"
+        hx-target="#ticket-{{ ticket.id }}"
+        hx-swap="outerHTML"
+        class="mt-2">
+    <select name="assigned_to_id"
+            class="form-select form-select-sm ticket-assign-select"
+            onchange="this.form.requestSubmit()"
+            {% if current_user.role.value == 'lector' %}disabled{% endif %}>
+      <option value="">— Sin asignar —</option>
+      {% for u in all_users %}
+      <option value="{{ u.id }}" {% if ticket.assigned_to_id == u.id %}selected{% endif %}>
+        {{ u.name }}
+      </option>
+      {% endfor %}
+    </select>
+  </form>
+
+  <!-- Actions -->
+  <div class="d-flex justify-content-end mt-2">
+    <a href="/tickets/{{ ticket.id }}" class="btn btn-xs btn-outline-secondary">
+      <i class="bi bi-arrow-up-right-square"></i> Ver
+    </a>
+  </div>
+</div>

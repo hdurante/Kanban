@@ -12,8 +12,10 @@
 # Created     : 2026-04-24
 # Version     : 1.0.0
 # =============================================================================
+from pathlib import Path
+
 from fastapi import APIRouter, Depends, Form, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -24,6 +26,12 @@ from app.models.system_config import SystemConfig
 from app.models.user import User
 
 router = APIRouter(prefix="/settings", tags=["settings"])
+
+SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "scripts"
+BACKUP_SCRIPT_FILES = {
+    "backup_db.sh": "Crea un respaldo SQL timestamped dentro de /backups",
+    "restore_db.sh": "Restaura un respaldo SQL en la base de datos",
+}
 
 DEFAULT_CONFIG = {
     "completed_hide_days": ("7", "Días para ocultar tickets terminados"),
@@ -60,7 +68,27 @@ async def settings_page(
             "defaults": DEFAULT_CONFIG,
             "current_user": current_user,
             "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix,
+            "backup_script_files": BACKUP_SCRIPT_FILES,
         },
+    )
+
+
+@router.get("/scripts/{script_name}")
+async def download_script(
+    script_name: str,
+    current_user: User = Depends(require_admin),
+):
+    if script_name not in BACKUP_SCRIPT_FILES:
+        return RedirectResponse("/settings", status_code=302)
+
+    file_path = SCRIPTS_DIR / script_name
+    if not file_path.exists() or not file_path.is_file():
+        return RedirectResponse("/settings", status_code=302)
+
+    return FileResponse(
+        path=str(file_path),
+        media_type="text/x-shellscript",
+        filename=script_name,
     )
 
 

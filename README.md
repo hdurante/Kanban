@@ -103,6 +103,32 @@ All settings can be changed in the **Admin → Configuración** panel or via `.e
 
 ---
 
+## Backups and Restore
+
+This project includes ready-to-use scripts for PostgreSQL backups:
+
+- `scripts/backup_db.sh`: creates a timestamped SQL backup in `./backups`
+- `scripts/restore_db.sh`: restores a SQL backup into the running DB service
+
+Examples:
+
+```bash
+# Create a backup
+bash scripts/backup_db.sh
+
+# Restore a backup
+bash scripts/restore_db.sh backups/kanban_YYYYMMDD_HHMMSS.sql
+
+# Restore after cleaning schema (destructive)
+bash scripts/restore_db.sh backups/kanban_YYYYMMDD_HHMMSS.sql --drop-public
+```
+
+You can also find copy-ready commands and script download links in:
+
+- **Admin → Configuración → Backups y migración**
+
+---
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

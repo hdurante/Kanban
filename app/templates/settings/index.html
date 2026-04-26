@@ -99,4 +99,35 @@
     </div>
   </form>
 </div>
+
+<div class="container mt-4" style="max-width:700px">
+  <div class="card shadow-sm p-4">
+    <h6 class="fw-bold mb-2"><i class="bi bi-database-up me-2"></i>Backups y migración</h6>
+    <p class="text-muted small mb-3">
+      Descarga scripts listos para automatizar respaldos diarios o restaurar la base en otro servidor.
+    </p>
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Descargar scripts</label>
+      <div class="d-flex flex-wrap gap-2">
+        {% for script_name, script_desc in backup_script_files.items() %}
+          <a href="/settings/scripts/{{ script_name }}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-download me-1"></i>{{ script_name }}
+          </a>
+        {% endfor %}
+      </div>
+      <div class="form-text mt-1">Los scripts se ejecutan desde la raíz del proyecto con Docker Compose activo.</div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Comando manual para backup (copiar)</label>
+      <textarea class="form-control" rows="2" readonly>docker compose exec -T db pg_dump -U kanban -d kanban > backups/kanban_$(date +"%Y%m%d_%H%M%S").sql</textarea>
+    </div>
+
+    <div class="mb-0">
+      <label class="form-label fw-semibold">Comando manual para restore (copiar)</label>
+      <textarea class="form-control" rows="2" readonly>cat backups/kanban_YYYYMMDD_HHMMSS.sql | docker compose exec -T db psql -v ON_ERROR_STOP=1 -U kanban -d kanban</textarea>
+    </div>
+  </div>
+</div>
 {% endblock %}

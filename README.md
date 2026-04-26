@@ -37,6 +37,54 @@ docker compose up -d
 
 ---
 
+## Container Image (GitHub Actions + GHCR)
+
+This repository publishes Docker images automatically to GitHub Container Registry (GHCR) using:
+
+- `.github/workflows/docker-publish.yml`
+
+Published image name:
+
+- `ghcr.io/hdurante/kanban`
+
+Tag strategy:
+
+- `latest` on the default branch
+- branch tag (for example: `develop`)
+- release tag (`v1.2.0`)
+- commit tag (`sha-<commit>`)
+
+Pull example:
+
+```bash
+docker pull ghcr.io/hdurante/kanban:latest
+```
+
+Deploy with prebuilt image (no local build):
+
+```bash
+cp .env.example .env
+# Edit SECRET_KEY and email vars if needed
+docker compose -f docker-compose.release.yml up -d
+```
+
+Run example (app container only):
+
+```bash
+docker run -d --name kanban-app -p 8000:8000 \
+  -e DATABASE_URL="postgresql+asyncpg://kanban:kanban@<db-host>:5432/kanban" \
+  -e SECRET_KEY="change-me" \
+  ghcr.io/hdurante/kanban:latest
+```
+
+Note: if the package is private, consumers must authenticate first:
+
+```bash
+echo "<GITHUB_TOKEN>" | docker login ghcr.io -u <github_user> --password-stdin
+```
+
+---
+
 ## Local Development (without Docker)
 
 ```bash

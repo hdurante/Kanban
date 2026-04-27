@@ -3,7 +3,12 @@ set -euo pipefail
 
 # Creates a SQL backup from the docker-compose PostgreSQL service.
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-BACKUP_DIR="${1:-$PROJECT_DIR/backups}"
+BACKUP_DIR_INPUT="${1:-backups}"
+if [[ "$BACKUP_DIR_INPUT" = /* ]]; then
+	BACKUP_DIR="$BACKUP_DIR_INPUT"
+else
+	BACKUP_DIR="$PROJECT_DIR/$BACKUP_DIR_INPUT"
+fi
 TIMESTAMP="$(date +"%Y%m%d_%H%M%S")"
 OUTPUT_FILE="$BACKUP_DIR/kanban_${TIMESTAMP}.sql"
 

@@ -15,6 +15,9 @@ fi
 BACKUP_FILE="$1"
 MODE="${2:-}"
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+BACKUP_DIR="$PROJECT_DIR/backups"
+
+mkdir -p "$BACKUP_DIR"
 
 if [[ -n "$MODE" && "$MODE" != "--drop-public" && "$MODE" != "--clean" ]]; then
   echo "Unknown option: $MODE"
@@ -22,13 +25,23 @@ if [[ -n "$MODE" && "$MODE" != "--drop-public" && "$MODE" != "--clean" ]]; then
   exit 1
 fi
 
-if [[ ! -f "$BACKUP_FILE" ]]; then
+if [[ "$BACKUP_FILE" = /* ]]; then
+  CANDIDATE_FILE="$BACKUP_FILE"
+elif [[ -f "$BACKUP_FILE" ]]; then
+  CANDIDATE_FILE="$(cd "$(dirname "$BACKUP_FILE")" && pwd)/$(basename "$BACKUP_FILE")"
+elif [[ -f "$BACKUP_DIR/$BACKUP_FILE" ]]; then
+  CANDIDATE_FILE="$BACKUP_DIR/$BACKUP_FILE"
+else
+  CANDIDATE_FILE="$BACKUP_DIR/$(basename "$BACKUP_FILE")"
+fi
+
+if [[ ! -f "$CANDIDATE_FILE" ]]; then
   echo "Backup file not found: $BACKUP_FILE"
+  echo "Expected in: $BACKUP_DIR"
   exit 1
 fi
 
-# Keep a stable absolute path before changing directories.
-BACKUP_FILE="$(cd "$(dirname "$BACKUP_FILE")" && pwd)/$(basename "$BACKUP_FILE")"
+BACKUP_FILE="$CANDIDATE_FILE"
 
 cd "$PROJECT_DIR"
 

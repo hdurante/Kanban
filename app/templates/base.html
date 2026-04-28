@@ -22,6 +22,11 @@
       <i class="bi bi-plus-lg"></i> Nuevo Ticket
     </a>
     {% endif %}
+    {% if current_user.role.value in ['admin','lider'] %}
+    <a href="/references" class="btn btn-sm btn-outline-light">
+      <i class="bi bi-upc-scan me-1"></i> Referencias
+    </a>
+    {% endif %}
     {% if current_user.role.value == 'admin' %}
     <div class="dropdown">
       <button class="btn btn-sm btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">

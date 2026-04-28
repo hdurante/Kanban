@@ -16,6 +16,7 @@ from app.models.group import Group
 from app.models.status import Status
 from app.models.ticket import Ticket, TicketStatusHistory, Priority
 from app.models.system_config import SystemConfig
+from app.models.reference_number import ReferenceNumber
 
 __all__ = [
     "User",
@@ -28,4 +29,5 @@ __all__ = [
     "TicketStatusHistory",
     "Priority",
     "SystemConfig",
+    "ReferenceNumber",
 ]

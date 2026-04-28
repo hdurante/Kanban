@@ -24,6 +24,7 @@ from app.config import settings
 from app.database import get_db
 from app.dependencies import get_current_user, require_usuario_or_above
 from app.models.group import Group
+from app.models.reference_number import ReferenceNumber
 from app.models.status import Status
 from app.models.ticket import Ticket, TicketStatusHistory, Priority
 from app.models.user import User, UserRole, user_group
@@ -71,6 +72,19 @@ def _parse_estimated_cost_hours(value: str) -> int | None:
     return int(round(hours * 60))
 
 
+def _parse_progress_percentage(value: str, default: int = 0) -> int:
+    normalized = (value or "").strip()
+    if not normalized:
+        return default
+    try:
+        parsed = int(normalized)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail="El porcentaje debe ser un entero") from exc
+    if parsed < 0 or parsed > 100:
+        raise HTTPException(status_code=400, detail="El porcentaje debe estar entre 0 y 100")
+    return parsed
+
+
 def _validate_ticket_text_fields(title: str, description: str) -> tuple[str, str]:
     title_clean = title.strip()
     if not title_clean:
@@ -90,6 +104,41 @@ async def _can_edit_ticket(current_user: User, ticket: Ticket) -> bool:
     if current_user.role == UserRole.colaborador:
         return ticket.assigned_to_id == current_user.id or ticket.created_by_id == current_user.id
     return False
+
+
+def _can_edit_reference_value(current_user: User) -> bool:
+    return current_user.role in (UserRole.admin, UserRole.lider)
+
+
+async def _get_reference_values(db: AsyncSession) -> list[str]:
+    result = await db.execute(select(ReferenceNumber).order_by(ReferenceNumber.value.asc()))
+    return [r.value for r in result.scalars().all()]
+
+
+async def _resolve_reference_value(
+    db: AsyncSession,
+    current_user: User,
+    reference_select: str,
+    reference_new: str,
+    known_values: list[str],
+) -> str | None:
+    selected = (reference_select or "").strip()
+    new_value = (reference_new or "").strip()
+    known = set(known_values)
+
+    if _can_edit_reference_value(current_user):
+        candidate = new_value or selected
+        if not candidate:
+            return None
+        if len(candidate) > 100:
+            raise HTTPException(status_code=400, detail="La referencia no puede exceder 100 caracteres")
+        if candidate not in known:
+            db.add(ReferenceNumber(value=candidate, created_by_id=current_user.id))
+        return candidate
+
+    if selected and selected in known:
+        return selected
+    return None
 
 
 async def _load_ticket(db: AsyncSession, ticket_id: int) -> Ticket:
@@ -128,6 +177,7 @@ async def new_ticket_form(
     users = result.scalars().all()
     result = await db.execute(select(Status).order_by(Status.id))
     statuses = result.scalars().all()
+    references = await _get_reference_values(db)
 
     # Load user's first group id to pre-select in form (avoids lazy-load in template)
     ug_result = await db.execute(
@@ -148,6 +198,8 @@ async def new_ticket_form(
             "statuses": statuses,
             "priorities": PRIORITY_LABELS,
             "ticket": None,
+            "references": references,
+            "can_edit_reference_value": _can_edit_reference_value(current_user),
             "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix,
         },
     )
@@ -158,11 +210,13 @@ async def create_ticket(
     request: Request,
     title: str = Form(...),
     description: str = Form(""),
-    reference: str = Form(""),
+    reference_select: str = Form(""),
+    reference_new: str = Form(""),
     priority: str = Form("normal"),
     group_id: int = Form(...),
     estimated_date: str = Form(""),
     estimated_cost: str = Form(""),
+    progress_percentage: str = Form("0"),
     assigned_to_id: str = Form(""),
     requested_by_id: str = Form(""),
     current_user: User = Depends(require_usuario_or_above),
@@ -176,6 +230,9 @@ async def create_ticket(
             pass
 
     title, description = _validate_ticket_text_fields(title, description)
+    parsed_progress = _parse_progress_percentage(progress_percentage, default=0)
+    references = await _get_reference_values(db)
+    reference = await _resolve_reference_value(db, current_user, reference_select, reference_new, references)
 
     ticket = Ticket(
         title=title,
@@ -186,6 +243,7 @@ async def create_ticket(
         group_id=group_id,
         estimated_date=est_date,
         estimated_cost=_parse_estimated_cost_hours(estimated_cost),
+        progress_percentage=parsed_progress,
         assigned_to_id=int(assigned_to_id) if assigned_to_id else None,
         requested_by_id=int(requested_by_id) if requested_by_id else None,
         created_by_id=current_user.id,
@@ -224,6 +282,7 @@ async def ticket_detail(
     users = result.scalars().all()
     result = await db.execute(select(Status).order_by(Status.id))
     statuses = result.scalars().all()
+    references = await _get_reference_values(db)
 
     return _templates().TemplateResponse(
         "tickets/detail.html",
@@ -235,6 +294,8 @@ async def ticket_detail(
             "groups": groups,
             "users": users,
             "statuses": statuses,
+            "references": references,
+            "can_edit_reference_value": _can_edit_reference_value(current_user),
             "priorities": PRIORITY_LABELS,
             "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix,
         },
@@ -247,11 +308,13 @@ async def edit_ticket(
     request: Request,
     title: str = Form(...),
     description: str = Form(""),
-    reference: str = Form(""),
+    reference_select: str = Form(""),
+    reference_new: str = Form(""),
     priority: str = Form("normal"),
     group_id: int = Form(...),
     estimated_date: str = Form(""),
     estimated_cost: str = Form(""),
+    progress_percentage: str = Form("0"),
     assigned_to_id: str = Form(""),
     requested_by_id: str = Form(""),
     current_user: User = Depends(get_current_user),
@@ -262,6 +325,11 @@ async def edit_ticket(
         raise HTTPException(status_code=403, detail="No tienes permiso para editar este ticket")
 
     title, description = _validate_ticket_text_fields(title, description)
+    references = await _get_reference_values(db)
+    reference = await _resolve_reference_value(db, current_user, reference_select, reference_new, references)
+    parsed_progress = _parse_progress_percentage(progress_percentage, default=ticket.progress_percentage)
+    if ticket.status_id == 999:
+        parsed_progress = 100
 
     ticket.title = title
     ticket.description = description or None
@@ -269,6 +337,7 @@ async def edit_ticket(
     ticket.priority = Priority(priority)
     ticket.group_id = group_id
     ticket.estimated_cost = _parse_estimated_cost_hours(estimated_cost)
+    ticket.progress_percentage = parsed_progress
     ticket.assigned_to_id = int(assigned_to_id) if assigned_to_id else None
     ticket.requested_by_id = int(requested_by_id) if requested_by_id else None
 
@@ -311,6 +380,7 @@ async def change_status(
 
     if status_id == 999 and not ticket.finished_at:
         ticket.finished_at = datetime.now(timezone.utc)
+        ticket.progress_percentage = 100
     elif status_id != 999:
         ticket.finished_at = None
 

@@ -36,6 +36,10 @@
   <!-- Title -->
   <div class="ticket-title">{{ ticket.title }}</div>
 
+  <div class="mt-1">
+    <span class="badge text-bg-light border">Avance: {{ ticket.progress_percentage }}%</span>
+  </div>
+
   <!-- Reference -->
   {% if ticket.reference %}
   <div class="ticket-ref">

@@ -13,7 +13,7 @@
 # =============================================================================
 import enum
 
-from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String, Text
+from sqlalchemy import CheckConstraint, Column, DateTime, Enum, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -31,6 +31,9 @@ class Priority(str, enum.Enum):
 
 class Ticket(Base):
     __tablename__ = "tickets"
+    __table_args__ = (
+        CheckConstraint("progress_percentage >= 0 AND progress_percentage <= 100", name="ck_ticket_progress_percentage"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(150), nullable=False)
@@ -43,6 +46,7 @@ class Ticket(Base):
 
     estimated_date = Column(DateTime(timezone=True), nullable=True)
     estimated_cost = Column(Integer, nullable=True)  # minutes
+    progress_percentage = Column(Integer, nullable=False, default=0)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     finished_at = Column(DateTime(timezone=True), nullable=True)

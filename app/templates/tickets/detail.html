@@ -69,6 +69,10 @@
                 <td>{{ ticket.reference or '—' }}</td>
               </tr>
               <tr>
+                <th>Avance</th>
+                <td>{{ ticket.progress_percentage }}%</td>
+              </tr>
+              <tr>
                 <th>Fecha estimada</th>
                 <td>
                   {% if ticket.estimated_date %}

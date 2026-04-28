@@ -17,10 +17,11 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import text
 
 from app.config import settings
 from app.database import Base, engine
-from app.routers import auth, board, groups, settings as settings_router, statuses, tickets, users
+from app.routers import auth, board, groups, references, settings as settings_router, statuses, tickets, users
 
 
 @asynccontextmanager
@@ -28,6 +29,10 @@ async def lifespan(app: FastAPI):
     # Create tables on startup (use Alembic in production for migrations)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # Backward-compatible schema adjustments for existing databases.
+        await conn.execute(
+            text("ALTER TABLE tickets ADD COLUMN IF NOT EXISTS progress_percentage INTEGER NOT NULL DEFAULT 0")
+        )
 
     # Seed default data
     from app.database import AsyncSessionLocal
@@ -86,6 +91,7 @@ app.include_router(tickets.router)
 app.include_router(users.router)
 app.include_router(groups.router)
 app.include_router(statuses.router)
+app.include_router(references.router)
 app.include_router(settings_router.router)
 
 

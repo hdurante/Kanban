@@ -28,6 +28,7 @@ class TicketCreate(BaseModel):
     group_id: int
     estimated_date: Optional[datetime] = None
     estimated_cost: Optional[int] = None  # minutes
+    progress_percentage: int = 0
     assigned_to_id: Optional[int] = None
     requested_by_id: Optional[int] = None
 
@@ -40,6 +41,7 @@ class TicketUpdate(BaseModel):
     group_id: Optional[int] = None
     estimated_date: Optional[datetime] = None
     estimated_cost: Optional[int] = None
+    progress_percentage: Optional[int] = None
     assigned_to_id: Optional[int] = None
     requested_by_id: Optional[int] = None
 
@@ -65,6 +67,7 @@ class TicketCard(BaseModel):
     assigned_to_id: Optional[int] = None
     assigned_to_name: Optional[str] = None
     estimated_date: Optional[datetime] = None
+    progress_percentage: int = 0
     is_overdue: bool = False
     effective_color: str = "normal"
 
@@ -78,6 +81,7 @@ class TicketRead(BaseModel):
     reference: Optional[str] = None
     priority: Priority
     status_id: int
+    progress_percentage: int
     group_id: int
     group_name: str
     estimated_date: Optional[datetime] = None

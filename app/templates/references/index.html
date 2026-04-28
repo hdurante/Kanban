@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Referencias — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:860px">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="mb-0 fw-bold"><i class="bi bi-upc-scan me-2"></i>Catálogo de referencias</h5>
+    <a href="/board" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Volver</a>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-5">
+      <form method="post" action="/references" class="card shadow-sm p-3">
+        <label class="form-label fw-semibold">Nueva referencia</label>
+        <div class="input-group">
+          <input type="text" name="value" class="form-control" maxlength="100" placeholder="Ej. PROJ-1234" required>
+          <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i></button>
+        </div>
+        <div class="form-text">Solo admin y líder pueden crear o eliminar referencias.</div>
+      </form>
+    </div>
+
+    <div class="col-lg-7">
+      <div class="card shadow-sm">
+        <div class="card-header py-2 fw-semibold">Referencias registradas</div>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0 align-middle">
+            <thead>
+              <tr>
+                <th>Valor</th>
+                <th style="width:1%"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ref in references %}
+              <tr>
+                <td class="font-monospace">{{ ref.value }}</td>
+                <td>
+                  <form method="post" action="/references/{{ ref.id }}/delete" onsubmit="return confirm('¿Eliminar referencia?')">
+                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                  </form>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="2" class="text-muted">Sin referencias registradas.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -85,12 +85,35 @@
            placeholder="Ej. 0.5 = 30 min, 1.25 = 75 min" />
       </div>
 
-      <div class="col-12">
-        <label class="form-label fw-semibold">Referencia externa (ej. Jira)</label>
-        <input type="text" name="reference" class="form-control" maxlength="100"
-               value="{{ ticket.reference if ticket and ticket.reference else '' }}"
-               placeholder="PROJ-123" />
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Porcentaje de avance</label>
+        <input type="number" name="progress_percentage" class="form-control" min="0" max="100" step="1"
+          value="{{ ticket.progress_percentage if ticket else 0 }}"
+          {% if ticket and ticket.status_id == 999 %}readonly{% endif %} />
+        <div class="form-text">Valor entero entre 0 y 100. Si el estado es Terminado, se establece en 100 automáticamente.</div>
       </div>
+
+      <div class="col-12">
+        <label class="form-label fw-semibold">Referencia externa</label>
+        <select name="reference_select" class="form-select">
+          <option value="">— Sin referencia —</option>
+          {% for ref in references %}
+          <option value="{{ ref }}" {% if ticket and ticket.reference == ref %}selected{% endif %}>{{ ref }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      {% if can_edit_reference_value %}
+      <div class="col-12">
+        <label class="form-label fw-semibold">Nueva referencia (admin/lider)</label>
+        <input type="text" name="reference_new" class="form-control" maxlength="100"
+               value="{% if ticket and ticket.reference and ticket.reference not in references %}{{ ticket.reference }}{% endif %}"
+               placeholder="Escribe una nueva referencia o selecciona una existente" />
+        <div class="form-text">Si capturas un valor nuevo, se guardará en el catálogo para futuros tickets.</div>
+      </div>
+      {% else %}
+      <input type="hidden" name="reference_new" value="" />
+      {% endif %}
 
       <div class="col-12">
         <label class="form-label fw-semibold">Descripción</label>

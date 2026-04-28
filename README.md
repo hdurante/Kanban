@@ -179,4 +179,4 @@ You can also find copy-ready commands and script download links in:
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+GNU AGPLv3 — see [LICENSE](LICENSE).

@@ -12,9 +12,10 @@
 # Version     : 1.0.0
 # =============================================================================
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import text
@@ -75,13 +76,14 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.app_name,
     description="Tablero Kanban — Open Source",
-    version="1.0.0",
+    version=settings.app_version,
     lifespan=lifespan,
     docs_url="/api/docs" if settings.debug else None,
     redoc_url=None,
 )
 
 templates = Jinja2Templates(directory="app/templates")
+templates.env.globals["app_version"] = settings.app_version
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # ── Routers ──────────────────────────────────────────────────────────────────
@@ -93,6 +95,26 @@ app.include_router(groups.router)
 app.include_router(statuses.router)
 app.include_router(references.router)
 app.include_router(settings_router.router)
+
+
+@app.api_route("/sw.js", methods=["GET", "HEAD"], include_in_schema=False)
+async def service_worker():
+    sw_template = Path("app/static/sw.js").read_text(encoding="utf-8")
+    sw_content = sw_template.replace("__APP_VERSION__", settings.app_version)
+    # Must be served from root to control navigation requests across the app.
+    return Response(
+        content=sw_content,
+        media_type="application/javascript",
+        headers={"Service-Worker-Allowed": "/", "Cache-Control": "no-cache"},
+    )
+
+
+@app.api_route("/manifest.webmanifest", methods=["GET", "HEAD"], include_in_schema=False)
+async def webmanifest():
+    return FileResponse(
+        "app/static/manifest.webmanifest",
+        media_type="application/manifest+json",
+    )
 
 
 @app.get("/", response_class=HTMLResponse)

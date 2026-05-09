@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sin conexion | Kanban</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --ink: #133047;
+      --muted: #4d6578;
+      --accent: #0f2a3d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(circle at 15% 20%, #dceaf8 0, var(--bg) 45%),
+        radial-gradient(circle at 85% 80%, #ddeeff 0, var(--bg) 55%);
+      color: var(--ink);
+      padding: 1.25rem;
+    }
+
+    .card {
+      width: min(520px, 100%);
+      background: var(--card);
+      border: 1px solid #d5e4f0;
+      border-radius: 16px;
+      box-shadow: 0 14px 40px rgba(16, 45, 70, 0.12);
+      padding: 1.5rem;
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      font-size: 1.5rem;
+    }
+
+    p {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 0.65rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .hint {
+      margin-top: 1rem;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <section class="card">
+    <h1>Sin conexion</h1>
+    <p>No hay acceso a internet en este momento. Puedes volver a intentar cuando se restablezca la red.</p>
+    <button class="btn" onclick="window.location.reload()">Reintentar</button>
+    <p class="hint">Tip: instala esta app para usarla como aplicacion desde tu dispositivo.</p>
+  </section>
+</body>
+</html>

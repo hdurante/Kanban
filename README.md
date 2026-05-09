@@ -13,6 +13,7 @@ Open-source Kanban board built with **FastAPI**, **PostgreSQL**, **HTMX**, and *
 - External ticket reference field (Jira, etc.)
 - Admin panel: users, groups, states, system config
 - Docker-first deployment
+- Progressive Web App (PWA) support with offline fallback page
 
 ---
 
@@ -104,6 +105,34 @@ The app creates all tables and seeds default statuses + admin user on first boot
 
 ---
 
+## PWA (Installable App)
+
+The frontend now ships with a Web App Manifest and Service Worker, so modern browsers can install it as an app.
+
+Install and test:
+
+```bash
+# Start the app
+uvicorn app.main:app --reload
+
+# Open in browser
+http://localhost:8000
+```
+
+Then:
+
+- Open browser DevTools -> Application -> Manifest and Service Workers
+- Confirm `manifest.webmanifest` and `sw.js` are detected
+- Use the browser install option (for example, "Install app")
+- Disable network and reload to validate the offline fallback screen
+
+Notes:
+
+- Service Workers require a secure context (`https`) or `localhost`
+- First installability checks may require one full reload after first visit
+
+---
+
 ## Project Structure
 
 ```
@@ -145,6 +174,7 @@ All settings can be changed in the **Admin → Configuración** panel or via `.e
 | `SECRET_KEY` | *(required)* | JWT signing key — must be long and random |
 | `DATABASE_URL` | `postgresql+asyncpg://kanban:kanban@db:5432/kanban` | Postgres connection |
 | `COMPLETED_HIDE_DAYS` | `7` | Days before hiding finished tickets |
+| `APP_VERSION` | `1.0.0` | App release version shown in the browser title and used for PWA cache versioning |
 | `OTP_MAX_USES` | `99` | Maximum uses per OTP token |
 | `OTP_EXPIRE_DAYS` | `30` | OTP validity in days |
 | `SMTP_*` | — | Email settings for OTP delivery |

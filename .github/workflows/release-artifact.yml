@@ -1,0 +1,32 @@
+name: Release Installable Artifact
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-artifact:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare release package
+        run: |
+          mkdir kanban-release
+          cp release/install.sh kanban-release/
+          cp release/README.md kanban-release/
+          cp release/.env.example kanban-release/
+          cp release/docker-compose.release.yml kanban-release/
+          cp release/upgrade.sh kanban-release/
+          tar -czf kanban-release.tar.gz -C kanban-release .
+
+      - name: Upload release artifact
+        uses: softprops/action-gh-release@v2
+        with:
+          files: kanban-release.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

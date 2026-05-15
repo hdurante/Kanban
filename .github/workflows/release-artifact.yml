@@ -1,8 +1,10 @@
+
 name: Release Installable Artifact
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*'
 
 permissions:
   contents: write
@@ -24,9 +26,12 @@ jobs:
           cp release/upgrade.sh kanban-release/
           tar -czf kanban-release.tar.gz -C kanban-release .
 
-      - name: Upload release artifact
+      - name: Create GitHub Release and upload artifact
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body: 'Release generado automáticamente desde tag.'
           files: kanban-release.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

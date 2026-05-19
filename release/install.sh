@@ -22,6 +22,7 @@ if [ -z "$SECRET_KEY" ]; then
   echo "  → Generado: $SECRET_KEY"
 fi
 prompt APP_PORT "Puerto para la app (8000 por default)" "8000"
+prompt APP_BASE_PATH "Ruta virtual en nginx (ej. /kanban, o vacío para raíz)" ""
 prompt POSTGRES_PORT "Puerto para Postgres (5432 por default)" "5432"
 prompt ADMIN_EMAIL "Email admin inicial" "admin@kanban.local"
 prompt ADMIN_PASSWORD "Clave admin inicial" "admin1234"
@@ -31,13 +32,15 @@ cp .env.example .env
 sed -i "s|^SECRET_KEY=.*|SECRET_KEY=$SECRET_KEY|" .env
 sed -i "s|^DATABASE_URL=.*|DATABASE_URL=postgresql+asyncpg://kanban:kanban@db:$POSTGRES_PORT/kanban|" .env
 sed -i "s|^APP_PORT=.*|APP_PORT=$APP_PORT|" .env
+sed -i "s|^APP_BASE_PATH=.*|APP_BASE_PATH=$APP_BASE_PATH|" .env
 sed -i "s|^POSTGRES_PORT=.*|POSTGRES_PORT=$POSTGRES_PORT|" .env
 
 # 3. Mostrar resumen
 cat <<EOF
 
 Configuración lista:
-  App:     http://localhost:$APP_PORT
+  App:     http://localhost:$APP_PORT${APP_BASE_PATH}
+  Ruta:    ${APP_BASE_PATH:-"raíz (/)"}
   Admin:   $ADMIN_EMAIL / $ADMIN_PASSWORD
   Postgres: puerto $POSTGRES_PORT
   SECRET_KEY: $SECRET_KEY
@@ -49,4 +52,4 @@ EOF
 KANBAN_IMAGE_TAG=${KANBAN_IMAGE_TAG:-latest}
 docker compose -f docker-compose.release.yml up -d
 
-echo "\nListo. Puedes acceder a http://localhost:$APP_PORT"
+echo "\nListo. Puedes acceder a http://localhost:$APP_PORT${APP_BASE_PATH:-/}"

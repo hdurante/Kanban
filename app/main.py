@@ -84,6 +84,16 @@ app = FastAPI(
 
 templates = Jinja2Templates(directory="app/templates")
 templates.env.globals["app_version"] = settings.app_version
+templates.env.globals["app_base_path"] = settings.app_base_path
+
+# Add url_for helper function for templates
+def template_url_for(path: str) -> str:
+    """Build URL with base path prefix if configured."""
+    base = settings.app_base_path.rstrip("/")
+    path = "/" + path.lstrip("/")
+    return f"{base}{path}" if base else path
+
+templates.env.globals["url_for"] = template_url_for
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # ── Routers ──────────────────────────────────────────────────────────────────
@@ -101,11 +111,12 @@ app.include_router(settings_router.router)
 async def service_worker():
     sw_template = Path("app/static/sw.js").read_text(encoding="utf-8")
     sw_content = sw_template.replace("__APP_VERSION__", settings.app_version)
-    # Must be served from root to control navigation requests across the app.
+    # Service-Worker-Allowed must match the base path or be at root
+    allowed_path = settings.app_base_path if settings.app_base_path else "/"
     return Response(
         content=sw_content,
         media_type="application/javascript",
-        headers={"Service-Worker-Allowed": "/", "Cache-Control": "no-cache"},
+        headers={"Service-Worker-Allowed": allowed_path, "Cache-Control": "no-cache"},
     )
 
 
@@ -119,6 +130,12 @@ async def webmanifest():
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
+    # Helper to build URL with base path
+    def build_url(path: str) -> str:
+        base = settings.app_base_path.rstrip("/")
+        path = "/" + path.lstrip("/")
+        return f"{base}{path}" if base else path
+    
     if request.cookies.get("access_token"):
-        return RedirectResponse("/board", status_code=302)
-    return RedirectResponse("/login", status_code=302)
+        return RedirectResponse(build_url("/board"), status_code=302)
+    return RedirectResponse(build_url("/login"), status_code=302)

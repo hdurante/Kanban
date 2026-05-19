@@ -19,7 +19,7 @@ from sqlalchemy.future import select
 
 from app.config import settings
 from app.database import get_db
-from app.dependencies import require_admin
+from app.dependencies import require_admin, url_for
 from app.models.status import Status
 from app.models.ticket import Ticket
 from app.models.user import User
@@ -93,7 +93,7 @@ async def create_status(
     status = Status(id=order, name=name, is_locked=False)
     db.add(status)
     await db.commit()
-    return RedirectResponse("/statuses", status_code=302)
+    return RedirectResponse(url_for("/statuses"), status_code=302)
 
 
 @router.post("/{status_id}/edit", response_class=HTMLResponse)
@@ -110,7 +110,7 @@ async def edit_status(
         raise HTTPException(status_code=404, detail="Estado no encontrado")
     status.name = name
     await db.commit()
-    return RedirectResponse("/statuses", status_code=302)
+    return RedirectResponse(url_for("/statuses"), status_code=302)
 
 
 @router.post("/{status_id}/delete")
@@ -133,4 +133,4 @@ async def delete_status(
 
     await db.delete(status)
     await db.commit()
-    return RedirectResponse("/statuses", status_code=302)
+    return RedirectResponse(url_for("/statuses"), status_code=302)

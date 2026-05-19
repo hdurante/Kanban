@@ -21,7 +21,7 @@ from sqlalchemy.future import select
 
 from app.config import settings
 from app.database import get_db
-from app.dependencies import require_admin
+from app.dependencies import require_admin, url_for
 from app.models.system_config import SystemConfig
 from app.models.user import User
 
@@ -79,11 +79,11 @@ async def download_script(
     current_user: User = Depends(require_admin),
 ):
     if script_name not in BACKUP_SCRIPT_FILES:
-        return RedirectResponse("/settings", status_code=302)
+        return RedirectResponse(url_for("/settings"), status_code=302)
 
     file_path = SCRIPTS_DIR / script_name
     if not file_path.exists() or not file_path.is_file():
-        return RedirectResponse("/settings", status_code=302)
+        return RedirectResponse(url_for("/settings"), status_code=302)
 
     return FileResponse(
         path=str(file_path),
@@ -125,4 +125,4 @@ async def save_settings(
             except (ValueError, TypeError):
                 pass
 
-    return RedirectResponse("/settings", status_code=302)
+    return RedirectResponse(url_for("/settings"), status_code=302)

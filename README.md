@@ -175,9 +175,47 @@ All settings can be changed in the **Admin → Configuración** panel or via `.e
 | `DATABASE_URL` | `postgresql+asyncpg://kanban:kanban@db:5432/kanban` | Postgres connection |
 | `COMPLETED_HIDE_DAYS` | `7` | Days before hiding finished tickets |
 | `APP_VERSION` | `1.0.0` | App release version shown in the browser title and used for PWA cache versioning |
+| `APP_BASE_PATH` | `` (empty) | Base path for virtual hosting (e.g., `/kanban`). All routes and redirects will be relative to this path. |
 | `OTP_MAX_USES` | `99` | Maximum uses per OTP token |
 | `OTP_EXPIRE_DAYS` | `30` | OTP validity in days |
 | `SMTP_*` | — | Email settings for OTP delivery |
+
+---
+
+## Virtual Hosting with a Path Prefix (nginx)
+
+If you need to deploy the app at a sub-path (e.g., `https://example.com/kanban` instead of `https://example.com`), set the `APP_BASE_PATH` environment variable:
+
+### Configuration
+
+1. **Set APP_BASE_PATH in .env:**
+
+   ```env
+   APP_BASE_PATH=/kanban
+   ```
+
+2. **Configure nginx reverse proxy:**
+
+   ```nginx
+   location /kanban/ {
+       proxy_pass http://localhost:8000/;
+       proxy_set_header Host $host;
+       proxy_set_header X-Real-IP $remote_addr;
+       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+       proxy_set_header X-Forwarded-Proto $scheme;
+   }
+   ```
+
+3. **How it works:**
+   - All HTML links and form actions are automatically rewritten to use the prefix
+   - JavaScript fetch calls adapt to the base path
+   - Redirects (e.g., after login) include the prefix: `/kanban/login` → `/kanban/board`
+   - The app works seamlessly at any path depth without code changes
+
+4. **Example URLs:**
+   - Login page: `https://example.com/kanban/login`
+   - Kanban board: `https://example.com/kanban/board`
+   - Admin users: `https://example.com/kanban/users`
 
 ---
 

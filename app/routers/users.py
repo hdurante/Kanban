@@ -20,7 +20,7 @@ from sqlalchemy.orm import selectinload
 
 from app.config import settings
 from app.database import get_db
-from app.dependencies import get_current_user, require_admin
+from app.dependencies import get_current_user, require_admin, url_for, url_for
 from app.models.group import Group
 from app.models.ticket import Ticket
 from app.models.user import User, UserRole, user_group
@@ -130,7 +130,7 @@ async def create_user(
         )
 
     await db.commit()
-    return RedirectResponse("/users", status_code=302)
+    return RedirectResponse(url_for("/users"), status_code=302)
 
 
 @router.get("/{user_id}/edit", response_class=HTMLResponse)
@@ -223,7 +223,7 @@ async def update_user(
         await db.execute(user_group.delete().where(user_group.c.user_id == user.id))
 
     await db.commit()
-    return RedirectResponse("/users", status_code=302)
+    return RedirectResponse(url_for("/users"), status_code=302)
 
 
 @router.post("/{user_id}/delete")
@@ -249,4 +249,4 @@ async def delete_user(
 
     await db.delete(user)
     await db.commit()
-    return RedirectResponse("/users", status_code=302)
+    return RedirectResponse(url_for("/users"), status_code=302)

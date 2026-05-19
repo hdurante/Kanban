@@ -2,6 +2,15 @@
  * board.js — Kanban drag & drop using SortableJS + HTMX
  */
 
+// Get app base path from meta tag
+const APP_BASE_PATH = document.querySelector('meta[name="app-base-path"]')?.content || '';
+
+function buildUrl(path) {
+  const basePath = APP_BASE_PATH.replace(/\/$/, '');
+  const cleanPath = '/' + path.replace(/^\//, '');
+  return basePath ? `${basePath}${cleanPath}` : cleanPath;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initBoard();
 });
@@ -43,7 +52,7 @@ function initBoard() {
         const formData = new FormData();
         formData.append('status_id', newStatusId);
 
-        fetch(`/tickets/${ticketId}/status`, {
+        fetch(buildUrl(`/tickets/${ticketId}/status`), {
           method: 'POST',
           body: formData,
         })

@@ -18,7 +18,7 @@ from sqlalchemy.future import select
 
 from app.config import settings
 from app.database import get_db
-from app.dependencies import require_lider_or_above
+from app.dependencies import require_lider_or_above, url_for
 from app.models.reference_number import ReferenceNumber
 from app.models.user import User
 
@@ -68,7 +68,7 @@ async def create_reference(
         db.add(ReferenceNumber(value=clean_value, created_by_id=current_user.id))
         await db.commit()
 
-    return RedirectResponse("/references", status_code=302)
+    return RedirectResponse(url_for("/references"), status_code=302)
 
 
 @router.post("/{reference_id}/delete")
@@ -82,4 +82,4 @@ async def delete_reference(
     if reference:
         await db.delete(reference)
         await db.commit()
-    return RedirectResponse("/references", status_code=302)
+    return RedirectResponse(url_for("/references"), status_code=302)

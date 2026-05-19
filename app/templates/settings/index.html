@@ -6,7 +6,7 @@
   <h5 class="fw-bold mb-1"><i class="bi bi-sliders me-2"></i>Configuración del sistema</h5>
   <p class="text-muted small mb-4">Los cambios se aplican de inmediato y persisten en la base de datos.</p>
 
-  <form method="post" action="/settings" class="card shadow-sm p-4">
+  <form method="post" action="{{ url_for('/settings') }}" class="card shadow-sm p-4">
     <div class="row g-3">
 
       <div class="col-12">

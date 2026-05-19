@@ -14,7 +14,7 @@
 
 <div class="container" style="max-width:860px">
   <div class="d-flex align-items-center gap-2 mb-3">
-    <a href="/board" class="btn btn-sm btn-outline-secondary">
+    <a href="{{ url_for('/board') }}" class="btn btn-sm btn-outline-secondary">
       <i class="bi bi-arrow-left"></i> Tablero
     </a>
     <h5 class="mb-0">
@@ -28,7 +28,7 @@
     <a href="#" class="btn btn-sm btn-primary" onclick="showEditForm()">
       <i class="bi bi-pencil"></i> Editar
     </a>
-    <form method="post" action="/tickets/{{ ticket.id }}/delete"
+    <form method="post" action="{{ url_for('/tickets/' + ticket.id|string + '/delete') }}"
           onsubmit="return confirm('¿Eliminar este ticket?')">
       <button type="submit" class="btn btn-sm btn-outline-danger">
         <i class="bi bi-trash"></i>
@@ -125,7 +125,7 @@
           <i class="bi bi-arrow-left-right me-1"></i> Cambiar estado
         </div>
         <div class="card-body py-2">
-          <form method="post" action="/tickets/{{ ticket.id }}/status">
+          <form method="post" action="{{ url_for('/tickets/' + ticket.id|string + '/status') }}">
             <div class="input-group input-group-sm">
               <select name="status_id" class="form-select">
                 {% for s in statuses %}

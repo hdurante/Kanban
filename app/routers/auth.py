@@ -26,7 +26,7 @@ from app.services.auth import (
     validate_otp_token,
 )
 from app.services.email import send_otp_email
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, url_for
 from app.config import settings
 
 router = APIRouter(tags=["auth"])
@@ -40,7 +40,7 @@ def _templates():
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     if request.cookies.get("access_token"):
-        return RedirectResponse("/board", status_code=302)
+        return RedirectResponse(url_for("/board"), status_code=302)
     return _templates().TemplateResponse("login.html", {"request": request, "app_name": settings.app_name, "app_title_suffix": settings.app_title_suffix})
 
 
@@ -59,7 +59,7 @@ async def login(
             status_code=400,
         )
     token = create_access_token({"sub": str(user.id), "role": user.role})
-    response = RedirectResponse("/board", status_code=302)
+    response = RedirectResponse(url_for("/board"), status_code=302)
     response.set_cookie(
         "access_token",
         token,
@@ -119,7 +119,7 @@ async def verify_otp(
             status_code=400,
         )
     jwt_token = create_access_token({"sub": str(user.id), "role": user.role})
-    response = RedirectResponse("/board", status_code=302)
+    response = RedirectResponse(url_for("/board"), status_code=302)
     response.set_cookie(
         "access_token",
         jwt_token,
@@ -132,6 +132,6 @@ async def verify_otp(
 
 @router.get("/logout")
 async def logout():
-    response = RedirectResponse("/login", status_code=302)
+    response = RedirectResponse(url_for("/login"), status_code=302)
     response.delete_cookie("access_token")
     return response

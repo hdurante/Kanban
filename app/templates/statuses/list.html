@@ -20,7 +20,7 @@
     <div class="col-md-5">
       <div class="card shadow-sm p-3">
         <h6 class="fw-semibold mb-3">Nuevo estado</h6>
-        <form method="post" action="/statuses/new">
+        <form method="post" action="{{ url_for('/statuses/new') }}">
           <div class="mb-2">
             <label class="form-label small fw-semibold">Orden (2–998)</label>
             <input type="number" name="order" class="form-control form-control-sm"
@@ -53,7 +53,7 @@
             <button class="btn btn-xs btn-outline-primary" onclick="toggleEdit({{ s.id }})">
               <i class="bi bi-pencil"></i>
             </button>
-            <form method="post" action="/statuses/{{ s.id }}/delete" class="d-inline"
+            <form method="post" action="{{ url_for('/statuses/' + s.id|string + '/delete') }}" class="d-inline"
                   onsubmit="return confirm('Los tickets en este estado pasarán a Por Hacer. ¿Continuar?')">
               <button type="submit" class="btn btn-xs btn-outline-danger">
                 <i class="bi bi-trash"></i>
@@ -63,7 +63,7 @@
           </li>
           {% if not s.is_locked %}
           <li class="list-group-item p-0" id="edit-{{ s.id }}" style="display:none">
-            <form method="post" action="/statuses/{{ s.id }}/edit" class="d-flex gap-2 p-2">
+            <form method="post" action="{{ url_for('/statuses/' + s.id|string + '/edit') }}" class="d-flex gap-2 p-2">
               <input type="text" name="name" class="form-control form-control-sm"
                      value="{{ s.name }}" required />
               <button type="submit" class="btn btn-sm btn-success">

@@ -18,7 +18,7 @@ from sqlalchemy.future import select
 
 from app.config import settings
 from app.database import get_db
-from app.dependencies import require_admin, get_current_user
+from app.dependencies import require_admin, get_current_user, url_for
 from app.models.group import Group
 from app.models.user import User
 
@@ -70,7 +70,7 @@ async def create_group(
     group = Group(name=name, description=description or None)
     db.add(group)
     await db.commit()
-    return RedirectResponse("/groups", status_code=302)
+    return RedirectResponse(url_for("/groups"), status_code=302)
 
 
 @router.post("/{group_id}/edit", response_class=HTMLResponse)
@@ -89,7 +89,7 @@ async def edit_group(
     group.name = name
     group.description = description or None
     await db.commit()
-    return RedirectResponse("/groups", status_code=302)
+    return RedirectResponse(url_for("/groups"), status_code=302)
 
 
 @router.post("/{group_id}/delete")
@@ -104,4 +104,4 @@ async def delete_group(
         raise HTTPException(status_code=404, detail="Grupo no encontrado")
     await db.delete(group)
     await db.commit()
-    return RedirectResponse("/groups", status_code=302)
+    return RedirectResponse(url_for("/groups"), status_code=302)

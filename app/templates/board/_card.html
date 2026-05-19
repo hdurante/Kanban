@@ -49,7 +49,7 @@
   {% endif %}
 
   <!-- Assignee dropdown (inline update via HTMX) -->
-  <form hx-post="/tickets/{{ ticket.id }}/assign"
+  <form hx-post="{{ url_for('/tickets/' + ticket.id|string + '/assign') }}"
         hx-target="#ticket-{{ ticket.id }}"
         hx-swap="outerHTML"
         class="mt-2">
@@ -68,7 +68,7 @@
 
   <!-- Actions -->
   <div class="d-flex justify-content-end mt-2">
-    <a href="/tickets/{{ ticket.id }}" class="btn btn-xs btn-outline-secondary">
+    <a href="{{ url_for('/tickets/' + ticket.id|string) }}" class="btn btn-xs btn-outline-secondary">
       <i class="bi bi-arrow-up-right-square"></i> Ver
     </a>
   </div>

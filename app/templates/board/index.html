@@ -19,7 +19,7 @@
 <div class="board-wrap">
 
   <!-- Filters bar -->
-  <form method="get" action="/board" class="board-filters d-flex flex-wrap gap-2 align-items-center">
+  <form method="get" action="{{ url_for('/board') }}" class="board-filters d-flex flex-wrap gap-2 align-items-center">
     <span class="fw-semibold text-muted small"><i class="bi bi-funnel me-1"></i>Filtros:</span>
 
     <select name="group_id" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()">
@@ -51,7 +51,7 @@
     </div>
 
     {% if filter_group_id or filter_priority or filter_assigned_to or filter_search %}
-    <a href="/board" class="btn btn-sm btn-outline-danger">
+    <a href="{{ url_for('/board') }}" class="btn btn-sm btn-outline-danger">
       <i class="bi bi-x-circle"></i> Limpiar
     </a>
     {% endif %}

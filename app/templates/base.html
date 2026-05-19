@@ -7,6 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="app-base-path" content="{{ app_base_path }}" />
   <title>{% block title %}{{ app_name }}{% if app_title_suffix %} + {{ app_title_suffix }}{% endif %}{% endblock %} | V. {{ app_version }}</title>
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" type="image/svg+xml" href="/static/icons/icon.svg" />
@@ -20,17 +21,17 @@
 
 {% if current_user is defined and current_user %}
 <nav class="navbar navbar-dark bg-dark px-3 py-2 d-flex align-items-center gap-3">
-  <a class="navbar-brand fw-bold" href="/board">
+  <a class="navbar-brand fw-bold" href="{{ url_for('/board') }}">
     <i class="bi bi-kanban-fill me-1"></i>{{ app_name }}{% if app_title_suffix %} <small class="text-muted">+ {{ app_title_suffix }}</small>{% endif %}
   </a>
   <div class="d-flex gap-2 ms-auto align-items-center">
     {% if current_user.role.value in ['admin','lider','colaborador','usuario'] %}
-    <a href="/tickets/new" class="btn btn-sm btn-primary">
+    <a href="{{ url_for('/tickets/new') }}" class="btn btn-sm btn-primary">
       <i class="bi bi-plus-lg"></i> Nuevo Ticket
     </a>
     {% endif %}
     {% if current_user.role.value in ['admin','lider'] %}
-    <a href="/references" class="btn btn-sm btn-outline-light">
+    <a href="{{ url_for('/references') }}" class="btn btn-sm btn-outline-light">
       <i class="bi bi-upc-scan me-1"></i> Referencias
     </a>
     {% endif %}
@@ -40,11 +41,11 @@
         <i class="bi bi-gear-fill"></i> Admin
       </button>
       <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" href="/users"><i class="bi bi-people me-2"></i>Usuarios</a></li>
-        <li><a class="dropdown-item" href="/groups"><i class="bi bi-collection me-2"></i>Grupos</a></li>
-        <li><a class="dropdown-item" href="/statuses"><i class="bi bi-list-ol me-2"></i>Estados</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('/users') }}"><i class="bi bi-people me-2"></i>Usuarios</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('/groups') }}"><i class="bi bi-collection me-2"></i>Grupos</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('/statuses') }}"><i class="bi bi-list-ol me-2"></i>Estados</a></li>
         <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item" href="/settings"><i class="bi bi-sliders me-2"></i>Configuración</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('/settings') }}"><i class="bi bi-sliders me-2"></i>Configuración</a></li>
       </ul>
     </div>
     {% endif %}
@@ -52,7 +53,7 @@
       <i class="bi bi-person-circle me-1"></i>{{ current_user.name }}
       <span class="badge bg-secondary ms-1">{{ current_user.role.value }}</span>
     </span>
-    <a href="/logout" class="btn btn-sm btn-outline-danger">
+    <a href="{{ url_for('/logout') }}" class="btn btn-sm btn-outline-danger">
       <i class="bi bi-box-arrow-right"></i>
     </a>
   </div>

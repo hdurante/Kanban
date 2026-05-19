@@ -1,4 +1,4 @@
-{% set form_action = "/tickets/" ~ ticket.id ~ "/edit" if ticket else "/tickets/new" %}
+{% set form_action = url_for('/tickets/' + ticket.id|string + '/edit') if ticket else url_for('/tickets/new') %}
 {% set form_title = "Editar Ticket #" ~ ticket.id if ticket else "Nuevo Ticket" %}
 
 <div class="container" style="max-width:700px">

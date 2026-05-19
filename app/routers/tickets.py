@@ -22,7 +22,7 @@ from sqlalchemy.orm import selectinload
 
 from app.config import settings
 from app.database import get_db
-from app.dependencies import get_current_user, require_usuario_or_above
+from app.dependencies import get_current_user, require_usuario_or_above, url_for
 from app.models.group import Group
 from app.models.reference_number import ReferenceNumber
 from app.models.status import Status
@@ -259,7 +259,7 @@ async def create_ticket(
     )
     db.add(history)
     await db.commit()
-    return RedirectResponse("/board", status_code=302)
+    return RedirectResponse(url_for("/board"), status_code=302)
 
 
 # ── Detail / Edit ────────────────────────────────────────────────────────────
@@ -350,7 +350,7 @@ async def edit_ticket(
         ticket.estimated_date = None
 
     await db.commit()
-    return RedirectResponse(f"/tickets/{ticket_id}", status_code=302)
+    return RedirectResponse(url_for(f"/tickets/{ticket_id}"), status_code=302)
 
 
 # ── Status change (drag & drop + manual) ────────────────────────────────────
@@ -464,4 +464,4 @@ async def delete_ticket(
         raise HTTPException(status_code=403, detail="Sin permiso")
     await db.delete(ticket)
     await db.commit()
-    return RedirectResponse("/board", status_code=302)
+    return RedirectResponse(url_for("/board"), status_code=302)

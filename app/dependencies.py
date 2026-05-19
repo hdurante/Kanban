@@ -79,3 +79,15 @@ require_usuario_or_above = require_role(
     UserRole.lider,
     UserRole.admin,
 )
+
+
+def url_for(path: str) -> str:
+    """Build URL with base path prefix if configured.
+    
+    Usage: url_for("/board") -> "/kanban/board" or "/board"
+    """
+    from app.config import settings
+    
+    base = settings.app_base_path.rstrip("/")
+    path = "/" + path.lstrip("/")
+    return f"{base}{path}" if base else path

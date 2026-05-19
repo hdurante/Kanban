@@ -23,6 +23,7 @@ services:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-kanban}:${POSTGRES_PASSWORD:-kanban}@db:5432/${POSTGRES_DB:-kanban}
       SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-a-long-random-value}
       APP_VERSION: ${APP_VERSION:-1.0.0}
+      APP_BASE_PATH: ${APP_BASE_PATH:-}
       DEBUG: "false"
       SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
       SMTP_PORT: ${SMTP_PORT:-587}

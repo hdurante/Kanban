@@ -23,6 +23,7 @@ services:
       DATABASE_URL: postgresql+asyncpg://kanban:kanban@db:5432/kanban
       SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-a-long-random-value}
       APP_VERSION: ${APP_VERSION:-1.0.0}
+      APP_BASE_PATH: ${APP_BASE_PATH:-/kanban}
       DEBUG: "false"
       # Email — configure in .env or here
       SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
